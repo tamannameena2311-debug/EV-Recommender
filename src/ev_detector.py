@@ -10,6 +10,7 @@ from scipy.signal import butter, filtfilt
 
 SAMPLING_RATE = 100
 WINDOW_SECONDS = 3
+MIN_CAPTURE_SECONDS = 9
 WINDOW_SIZE = SAMPLING_RATE * WINDOW_SECONDS
 LOW_FREQ_CUTOFF = 3.0
 FFT_MIN_FREQ = 3.0
@@ -84,12 +85,12 @@ def _prepare_capture(csv_bytes):
 
     df["time_sec"] = df["time_sec"] - df["time_sec"].iloc[0]
     duration = float(df["time_sec"].iloc[-1])
-    if duration < WINDOW_SECONDS:
-        raise ValueError(f"Record at least {WINDOW_SECONDS} seconds before sending")
+    if duration < MIN_CAPTURE_SECONDS:
+        raise ValueError(f"Record at least {MIN_CAPTURE_SECONDS} seconds before sending")
 
     target_times = np.arange(0, duration, 1 / SAMPLING_RATE)
-    if len(target_times) < WINDOW_SIZE:
-        raise ValueError(f"Record at least {WINDOW_SECONDS} seconds before sending")
+    if len(target_times) < MIN_CAPTURE_SECONDS * SAMPLING_RATE:
+        raise ValueError(f"Record at least {MIN_CAPTURE_SECONDS} seconds before sending")
 
     resampled = pd.DataFrame({"time_sec": target_times})
     for axis in ["x", "y", "z"]:
